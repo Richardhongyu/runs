@@ -2,7 +2,9 @@ package main
 
 import (
 	// "fmt"
+	"os"
 	sctx "context"
+	"config"
 
 	"github.com/urfave/cli"
 
@@ -132,6 +134,10 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 }
 
 func saveContainerState(ctx sctx.Context, opts runtime.CreateOpts) error {
-	log.G(ctx).Errorf("AAAAA TaskManager Create %+v", opts)
+	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
+	tmpFile, err := os.CreateTemp("/run/runs/lhy/", "state.json")
+	config.WriteJSON(tmpFile, opts);
+	// stateFilePath := filepath.Join("/run/runs/lhy/", stateFilename)
+	// os.Rename(tmpFile.Name(), stateFilePath)
 	return nil
 }
