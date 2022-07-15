@@ -40,55 +40,10 @@ your host.`,
 		status := libcontainer.Created
 		switch status {
 		case libcontainer.Created:
-
-			ctx := namespaces.WithNamespace(sctx.Background(), "default")
-
-			shimManager, err := shim.NewShimManager(ctx, &shim.ManagerConfig{
-				State:        "/var/run/runs",
-				Address:      "/run/containerd/containerd.sock",
-				TTRPCAddress: "/run/containerd/containerd.sock.ttrpc",
-			})
+			// task, err := findTask()
 			if err != nil {
 				return err
 			}
-			spec, err := loadSpec(specConfig)
-			if err != nil {
-				return err
-			}
-
-			specAny, err := protobuf.MarshalAnyToProto(spec)
-			if err != nil {
-				return err
-			}
-
-			opts := runtime.CreateOpts{
-				Spec: specAny,
-				// IO: runtime.IO{
-				// 	Stdin:    r.Stdin,
-				// 	Stdout:   r.Stdout,
-				// 	Stderr:   r.Stderr,
-				// 	Terminal: r.Terminal,
-				// },
-				// TaskOptions:    r.Options,
-				// SandboxID:      container.SandboxID,
-			}
-
-			opts.Runtime = "io.containerd.runc.v2"
-
-			// for _, m := range r.Rootfs {
-			// 	opts.Rootfs = append(opts.Rootfs, mount.Mount{
-			// 		Type:    m.Type,
-			// 		Source:  m.Source,
-			// 		Options: m.Options,
-			// 	})
-			// }
-
-			taskManager := shim.NewTaskManager(shimManager)
-			task, err := taskManager.Create(ctx, "abc", opts)
-			if err != nil {
-				return err
-			}
-
 			err = task.Start(ctx)
 			if err != nil {
 				return err
@@ -109,3 +64,7 @@ your host.`,
 		}
 	},
 }
+
+// func findTask() (runtime.Task, error) {
+
+// }

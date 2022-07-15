@@ -2,8 +2,24 @@ package main
 
 import (
 	// "fmt"
+	sctx "context"
+	"errors"
+	"fmt"
+
+	"github.com/opencontainers/runc/libcontainer"
 
 	"github.com/urfave/cli"
+
+	"github.com/containerd/containerd/namespaces"
+	"github.com/containerd/containerd/protobuf"
+	"github.com/containerd/containerd/runtime"
+
+	"github.com/kata-contrib/runs/pkg/shim"
+
+)
+
+const (
+	stateFilename    = "state.json"
 )
 
 var createCommand = cli.Command{
@@ -55,6 +71,59 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		if err := checkArgs(context, 1, exactArgs); err != nil {
 			return err
 		}
+
+		ctx := namespaces.WithNamespace(sctx.Background(), "default")
+
+		shimManager, err := shim.NewShimManager(ctx, &shim.ManagerConfig{
+			State:        "/var/run/runs",
+			Address:      "/run/containerd/containerd.sock",
+			TTRPCAddress: "/run/containerd/containerd.sock.ttrpc",
+		})
+		if err != nil {
+			return err
+		}
+		spec, err := loadSpec(specConfig)
+		if err != nil {
+			return err
+		}
+
+		specAny, err := protobuf.MarshalAnyToProto(spec)
+		if err != nil {
+			return err
+		}
+
+		opts := runtime.CreateOpts{
+			Spec: specAny,
+			// IO: runtime.IO{
+			// 	Stdin:    r.Stdin,
+			// 	Stdout:   r.Stdout,
+			// 	Stderr:   r.Stderr,
+			// 	Terminal: r.Terminal,
+			// },
+			// TaskOptions:    r.Options,
+			// SandboxID:      container.SandboxID,
+		}
+
+		opts.Runtime = "io.containerd.runc.v2"
+
+		// for _, m := range r.Rootfs {
+		// 	opts.Rootfs = append(opts.Rootfs, mount.Mount{
+		// 		Type:    m.Type,
+		// 		Source:  m.Source,
+		// 		Options: m.Options,
+		// 	})
+		// }
+
+		taskManager := shim.NewTaskManager(shimManager)
+		task, err := taskManager.Create(ctx, "abc", opts)
+		if err != nil {
+			return err
+		}
+
+		if err := saveContainerState(opts); err != nil {
+			return err
+		}
+
 		// status, err := startContainer(context, CT_ACT_CREATE, nil)
 		// if err == nil {
 		// 	// exit with the container's exit status so any external supervisor
@@ -64,4 +133,8 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		// return fmt.Errorf("runc create failed: %w", err)
 		return nil
 	},
+}
+
+func saveContainerState(opts runtime.CreateOpts) error {
+	log.G(ctx).Errorf("AAAAA TaskManager Create %+v", opts)
 }
