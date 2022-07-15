@@ -1,19 +1,12 @@
 package main
 
 import (
-	sctx "context"
 	"errors"
 	"fmt"
 
 	"github.com/opencontainers/runc/libcontainer"
 
 	"github.com/urfave/cli"
-
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/protobuf"
-	"github.com/containerd/containerd/runtime"
-
-	"github.com/kata-contrib/runs/pkg/shim"
 )
 
 var startCommand = cli.Command{
