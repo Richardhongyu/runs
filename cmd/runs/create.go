@@ -4,7 +4,6 @@ import (
 	// "fmt"
 	"os"
 	sctx "context"
-	"config"
 
 	"github.com/urfave/cli"
 
@@ -13,7 +12,9 @@ import (
 	"github.com/containerd/containerd/runtime"
 	"github.com/containerd/containerd/log"
 	"github.com/kata-contrib/runs/pkg/shim"
+	"golang.org/x/sys/unix"
 
+	securejoin "github.com/cyphar/filepath-securejoin"
 )
 
 const (
@@ -135,9 +136,27 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 
 func saveContainerState(ctx sctx.Context, opts runtime.CreateOpts) error {
 	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
-	tmpFile, err := os.CreateTemp("/run/runs/lhy/", "state.json")
-	config.WriteJSON(tmpFile, opts);
+	containerRoot, err := securejoin.SecureJoin("/run/runs", "lhy")
+	if err != nil {
+		return err
+	}
+	os.Stat(containerRoot)
+	os.MkdirAll(containerRoot, 0711)
+	os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
+	tmpFile, err := os.CreateTemp(containerRoot, "state.json")
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tmpFile.Close()
+			os.Remove(tmpFile.Name())
+		}
+	}()
+
+	WriteJSON(tmpFile, opts);
 	// stateFilePath := filepath.Join("/run/runs/lhy/", stateFilename)
 	// os.Rename(tmpFile.Name(), stateFilePath)
 	return nil
 }
+
