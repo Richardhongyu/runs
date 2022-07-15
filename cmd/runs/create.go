@@ -13,7 +13,7 @@ import (
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/runtime"
-
+	"github.com/containerd/containerd/log"
 	"github.com/kata-contrib/runs/pkg/shim"
 
 )
@@ -115,12 +115,12 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		// }
 
 		taskManager := shim.NewTaskManager(shimManager)
-		task, err := taskManager.Create(ctx, "abc", opts)
+		taskManager.Create(ctx, "abc", opts)
 		if err != nil {
 			return err
 		}
 
-		if err := saveContainerState(opts); err != nil {
+		if err := saveContainerState(ctx, opts); err != nil {
 			return err
 		}
 
@@ -135,6 +135,7 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 	},
 }
 
-func saveContainerState(opts runtime.CreateOpts) error {
+func saveContainerState(ctx context.Context, opts runtime.CreateOpts) error {
 	log.G(ctx).Errorf("AAAAA TaskManager Create %+v", opts)
+	return nil
 }

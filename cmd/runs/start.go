@@ -41,18 +41,18 @@ your host.`,
 		switch status {
 		case libcontainer.Created:
 			// task, err := findTask()
-			if err != nil {
-				return err
-			}
-			err = task.Start(ctx)
-			if err != nil {
-				return err
-			}
-			pid, err := task.PID(ctx)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("pid %d\n", pid)
+			// if err != nil {
+			// 	return err
+			// }
+			// err = task.Start(ctx)
+			// if err != nil {
+			// 	return err
+			// }
+			// pid, err := task.PID(ctx)
+			// if err != nil {
+			// 	return err
+			// }
+			// fmt.Printf("pid %d\n", pid)
 
 			return nil
 		case libcontainer.Stopped:
