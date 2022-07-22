@@ -38,18 +38,18 @@ your host.`,
 		switch status {
 		case libcontainer.Created:
 	
-		ctx := namespaces.WithNamespace(sctx.Background(), "default")
+			ctx := namespaces.WithNamespace(sctx.Background(), "default")
 
-		id := context.GlobalString("id")
+			id := context.GlobalString("id")
 
-		fmt.Printf("id: %+v\n", id)
+			fmt.Printf("id: %+v\n", id)
 
 	        path, err := os.Getwd()
 	        if err != nil {
         	        return err
 	        }
 
-		bundle := &shim.Bundle{
+			bundle := &shim.Bundle{
                 	ID:        "abc",
 	                Path:      path,
         	        Namespace: "default",
@@ -69,20 +69,20 @@ your host.`,
 	        fmt.Printf("state error: %+v\n", err)
 	        fmt.Printf("state: %+v\n", state)
 
-		// task, err := findTask(context)
-		if err != nil {
-			return err
-		}
-			
-		err = task.Start(ctx)
-		if err != nil {
-			return err
-		}
-		pid, err := task.PID(ctx)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("pid %d\n", pid)
+			// task, err := findTask(context)
+			if err != nil {
+				return err
+			}
+				
+			err = task.Start(ctx)
+			if err != nil {
+				return err
+			}
+			pid, err := task.PID(ctx)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("pid %d\n", pid)
 
 			return nil
 		case libcontainer.Stopped:

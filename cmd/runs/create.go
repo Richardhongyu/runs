@@ -67,8 +67,26 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		},
 	},
 	Action: func(context *cli.Context) error {
-		if err := checkArgs(context, 1, exactArgs); err != nil {
-			return err
+		var (
+			id     string
+			ref    string
+			config = context.IsSet("config")
+		)
+
+		if config {
+			id = context.Args().First()
+			if context.NArg() > 1 {
+				return fmt.Errorf("with spec config file, only container id should be provided: %w", errdefs.ErrInvalidArgument)
+			}
+		} else {
+			id = context.Args().Get(1)
+			ref = context.Args().First()
+			if ref == "" {
+				return fmt.Errorf("image ref must be provided: %w", errdefs.ErrInvalidArgument)
+			}
+		}
+		if id == "" {
+			return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
 		}
 
 		ctx := namespaces.WithNamespace(sctx.Background(), "default")
@@ -114,12 +132,12 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		// }
 
 		taskManager := shim.NewTaskManager(shimManager)
-		taskManager.Create(ctx, "abc", opts)
+		taskManager.Create(ctx, id, opts)
 		if err != nil {
 			return err
 		}
 
-		if err := saveContainerState(ctx, opts); err != nil {
+		if err := saveContainerState(ctx, id, opts); err != nil {
 			return err
 		}
 
@@ -134,9 +152,9 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 	},
 }
 
-func saveContainerState(ctx sctx.Context, opts runtime.CreateOpts) error {
+func saveContainerState(ctx sctx.Context, taskID string, opts runtime.CreateOpts) error {
 	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
-	containerRoot, err := securejoin.SecureJoin("/run/runs", "lhy")
+	containerRoot, err := securejoin.SecureJoin("/run/runs", taskID)
 	if err != nil {
 		return err
 	}
