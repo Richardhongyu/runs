@@ -33,19 +33,20 @@ your host.`,
 		status := libcontainer.Created
 		switch status {
 		case libcontainer.Created:
-			// task, err := findTask()
-			// if err != nil {
-			// 	return err
-			// }
-			// err = task.Start(ctx)
-			// if err != nil {
-			// 	return err
-			// }
-			// pid, err := task.PID(ctx)
-			// if err != nil {
-			// 	return err
-			// }
-			// fmt.Printf("pid %d\n", pid)
+			task, err := findTask(context)
+			if err != nil {
+				return err
+			}
+			
+			err = task.Start(ctx)
+			if err != nil {
+				return err
+			}
+			pid, err := task.PID(ctx)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("pid %d\n", pid)
 
 			return nil
 		case libcontainer.Stopped:
@@ -58,6 +59,32 @@ your host.`,
 	},
 }
 
-// func findTask() (runtime.Task, error) {
+func findTask(context *cli.Context) (_ *shimTask, error) {
+	ctx := namespaces.WithNamespace(sctx.Background(), "default")
 
-// }
+	path, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	bundle := &shim.Bundle{
+		ID:        "abc",
+		Path:      path,
+		Namespace: "default",
+	}
+
+	s, err := shim.LoadShim(ctx, bundle, func() {})
+	if err != nil {
+		return err
+	}
+	state, err := s.State(ctx)
+	if err != nil {
+		// return err
+	}
+
+	// FIXME check state.
+
+	fmt.Printf("state error: %+v\n", err)
+	fmt.Printf("state: %+v\n", state)
+
+	return s, err
+}
