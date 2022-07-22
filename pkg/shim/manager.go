@@ -133,14 +133,17 @@ func (m *ShimManager) startShim(ctx context.Context, bundle *Bundle, id string, 
 
 	runtimePath, err := m.resolveRuntimePath(opts.Runtime)
 	if err != nil {
+		log.G(ctx).Errorf("AAAAA---------------------------------------------- %+v", opts)
 		return nil, fmt.Errorf("failed to resolve runtime path: %w", err)
 	}
-
+	log.G(ctx).Errorf("AAAAA1 ShimManager startShim opts %+v", opts)
 	b := shimBinary(bundle, shimBinaryConfig{
 		runtime:      runtimePath,
 		address:      m.containerdAddress,
 		ttrpcAddress: m.containerdTTRPCAddress,
 	})
+	
+	log.G(ctx).Errorf("AAAAA2 ShimManager startShim opts %+v", opts)
 	shim, err := b.Start(ctx, protobuf.FromAny(topts), func() {
 		log.G(ctx).WithField("id", id).Info("shim disconnected")
 
