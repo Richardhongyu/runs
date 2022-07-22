@@ -90,6 +90,14 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 			return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
 		}
 
+		containerRoot, err := securejoin.SecureJoin("/run/runs", id)
+		if err != nil {
+			return err
+		}
+		os.Stat(containerRoot)
+		os.MkdirAll(containerRoot, 0711)
+		os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
+
 		ctx := namespaces.WithNamespace(sctx.Background(), "default")
 
 		shimManager, err := shim.NewShimManager(ctx, &shim.ManagerConfig{
@@ -156,12 +164,12 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 func saveContainerState(ctx sctx.Context, taskID string, opts runtime.CreateOpts) error {
 	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
 	containerRoot, err := securejoin.SecureJoin("/run/runs", taskID)
-	if err != nil {
-		return err
-	}
-	os.Stat(containerRoot)
-	os.MkdirAll(containerRoot, 0711)
-	os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
+	// if err != nil {
+	// 	return err
+	// }
+	// os.Stat(containerRoot)
+	// os.MkdirAll(containerRoot, 0711)
+	// os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
 	tmpFile, err := os.CreateTemp(containerRoot, "state.json")
 	if err != nil {
 		return err
