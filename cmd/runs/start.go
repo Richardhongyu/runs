@@ -1,12 +1,16 @@
 package main
 
 import (
+	sctx "context"
+	"os"
 	"errors"
 	"fmt"
 
+	"github.com/containerd/containerd/namespaces"
 	"github.com/opencontainers/runc/libcontainer"
-
+//	"github.com/containerd/containerd/runtime"
 	"github.com/urfave/cli"
+	"github.com/kata-contrib/runs/pkg/shim"
 )
 
 var startCommand = cli.Command{
@@ -33,20 +37,52 @@ your host.`,
 		status := libcontainer.Created
 		switch status {
 		case libcontainer.Created:
-			task, err := findTask(context)
-			if err != nil {
-				return err
-			}
+	
+		ctx := namespaces.WithNamespace(sctx.Background(), "default")
+
+		id := context.GlobalString("id")
+
+		fmt.Printf("id: %+v\n", id)
+
+	        path, err := os.Getwd()
+	        if err != nil {
+        	        return err
+	        }
+
+		bundle := &shim.Bundle{
+                	ID:        "abc",
+	                Path:      path,
+        	        Namespace: "default",
+	        }
+
+	        task, err := shim.LoadShim(ctx, bundle, func() {})
+	        if err != nil {
+        	        return err
+	        }
+        	state, err := task.State(ctx)
+	        if err != nil {
+        	        // return err
+	        }
+
+        	// FIXME check state.
+
+	        fmt.Printf("state error: %+v\n", err)
+	        fmt.Printf("state: %+v\n", state)
+
+		// task, err := findTask(context)
+		if err != nil {
+			return err
+		}
 			
-			err = task.Start(ctx)
-			if err != nil {
-				return err
-			}
-			pid, err := task.PID(ctx)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("pid %d\n", pid)
+		err = task.Start(ctx)
+		if err != nil {
+			return err
+		}
+		pid, err := task.PID(ctx)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("pid %d\n", pid)
 
 			return nil
 		case libcontainer.Stopped:
@@ -59,32 +95,4 @@ your host.`,
 	},
 }
 
-func findTask(context *cli.Context) (_ *shimTask, error) {
-	ctx := namespaces.WithNamespace(sctx.Background(), "default")
 
-	path, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	bundle := &shim.Bundle{
-		ID:        "abc",
-		Path:      path,
-		Namespace: "default",
-	}
-
-	s, err := shim.LoadShim(ctx, bundle, func() {})
-	if err != nil {
-		return err
-	}
-	state, err := s.State(ctx)
-	if err != nil {
-		// return err
-	}
-
-	// FIXME check state.
-
-	fmt.Printf("state error: %+v\n", err)
-	fmt.Printf("state: %+v\n", state)
-
-	return s, err
-}
