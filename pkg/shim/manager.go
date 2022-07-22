@@ -80,14 +80,14 @@ type ShimManager struct {
 
 // Start launches a new shim instance
 func (m *ShimManager) Start(ctx context.Context, id string, opts runtime.CreateOpts) (_ ShimProcess, retErr error) {
-	path, err := os.Getwd()
+	_, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
-
+	log.G(ctx).Errorf("AAAAA  /run/runs/"+id)
 	bundle := &Bundle{
 		ID:        id,
-		Path:      path,
+		Path:      "/run/runs/"+id,
 		Namespace: "default",
 	}
 

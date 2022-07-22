@@ -1,13 +1,14 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"os"
 	sctx "context"
 
 	"github.com/urfave/cli"
 
 	"github.com/containerd/containerd/namespaces"
+	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/runtime"
 	"github.com/containerd/containerd/log"
@@ -70,10 +71,10 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		var (
 			id     string
 			ref    string
-			config = context.IsSet("config")
+		//	config = context.IsSet("config")
 		)
 
-		if config {
+		if 1==1 {
 			id = context.Args().First()
 			if context.NArg() > 1 {
 				return fmt.Errorf("with spec config file, only container id should be provided: %w", errdefs.ErrInvalidArgument)

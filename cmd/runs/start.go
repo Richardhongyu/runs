@@ -9,6 +9,7 @@ import (
 	"github.com/containerd/containerd/namespaces"
 	"github.com/opencontainers/runc/libcontainer"
 //	"github.com/containerd/containerd/runtime"
+	"github.com/containerd/containerd/errdefs"
 	"github.com/urfave/cli"
 	"github.com/kata-contrib/runs/pkg/shim"
 )
@@ -26,6 +27,27 @@ your host.`,
 		if err := checkArgs(context, 1, exactArgs); err != nil {
 			return err
 		}
+                var (
+                        id     string
+                        ref    string
+                //      config = context.IsSet("config")
+                )
+
+                if 1==1 {
+                        id = context.Args().First()
+                        if context.NArg() > 1 {
+                                return fmt.Errorf("with spec config file, only container id should be provided: %w", errdefs.ErrInvalidArgument)
+                        }
+                } else {
+                        id = context.Args().Get(1)
+                        ref = context.Args().First()
+                        if ref == "" {
+                                return fmt.Errorf("image ref must be provided: %w", errdefs.ErrInvalidArgument)
+                        }
+                }
+                if id == "" {
+                        return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
+                }
 		// container, err := getContainer(context)
 		// if err != nil {
 		// 	return err
@@ -40,18 +62,18 @@ your host.`,
 	
 			ctx := namespaces.WithNamespace(sctx.Background(), "default")
 
-			id := context.GlobalString("id")
+//			id := context.GlobalString("id")
 
 			fmt.Printf("id: %+v\n", id)
 
-	        path, err := os.Getwd()
+	        _, err := os.Getwd()
 	        if err != nil {
         	        return err
 	        }
 
 			bundle := &shim.Bundle{
-                	ID:        "abc",
-	                Path:      path,
+                	ID:        id,
+	                Path:      "/run/runs/"+id,
         	        Namespace: "default",
 	        }
 
