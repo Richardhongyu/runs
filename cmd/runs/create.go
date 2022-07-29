@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+		"io"
 	sctx "context"
 
 	"github.com/urfave/cli"
@@ -15,6 +16,7 @@ import (
 	"github.com/kata-contrib/runs/pkg/shim"
 	"golang.org/x/sys/unix"
 
+//	"cio"
 	"github.com/kata-contrib/runs/pkg/cio"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
@@ -27,6 +29,16 @@ const (
 type stdinCloser struct {
 	stdin  *os.File
 	closer func()
+}
+
+func (s *stdinCloser) Read(p []byte) (int, error) {
+	n, err := s.stdin.Read(p)
+	if err == io.EOF {
+		if s.closer != nil {
+			s.closer()
+		}
+	}
+	return n, err
 }
 
 var createCommand = cli.Command{
@@ -132,17 +144,18 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 			stdin: os.Stdin,
 		}
 		
-		ioOpts = []cio.Opt{cio.WithFIFODir(context.String("fifo-dir"))}
-		ioCreator = cio.NewCreator(append([]cio.Opt{cio.WithStreams(stdinC, os.Stdout, os.Stderr)}, ioOpts...)...)
+		ioOpts := []cio.Opt{cio.WithFIFODir(context.String("fifo-dir"))}
+		ioCreator := cio.NewCreator(append([]cio.Opt{cio.WithStreams(stdinC, os.Stdout, os.Stderr)}, ioOpts...)...)
 		
 		i, err := ioCreator(id)
+		cfg := i.Config()
 		opts := runtime.CreateOpts{
 			Spec: specAny,
 			IO: runtime.IO{
-				Stdin:    i.Stdin,
-				Stdout:   i.Stdout,
-				Stderr:   i.Stderr,
-				Terminal: i.Terminal,
+				Stdin:    cfg.Stdin,
+				Stdout:   cfg.Stdout,
+				Stderr:   cfg.Stderr,
+				Terminal: cfg.Terminal,
 			},
 			// TaskOptions:    r.Options,
 			// SandboxID:      container.SandboxID,
