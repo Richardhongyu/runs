@@ -15,12 +15,19 @@ import (
 	"github.com/kata-contrib/runs/pkg/shim"
 	"golang.org/x/sys/unix"
 
+	"github.com/kata-contrib/runs/pkg/cio"
+
 	securejoin "github.com/cyphar/filepath-securejoin"
 )
 
 const (
 	stateFilename    = "state.json"
 )
+
+type stdinCloser struct {
+	stdin  *os.File
+	closer func()
+}
 
 var createCommand = cli.Command{
 	Name:  "create",
@@ -117,15 +124,26 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		if err != nil {
 			return err
 		}
-
+		
+		// con = false
+		// nullIO = context.Bool("null-io")
+		// context.String("log-uri")
+		stdinC := &stdinCloser{
+			stdin: os.Stdin,
+		}
+		
+		ioOpts = []cio.Opt{cio.WithFIFODir(context.String("fifo-dir"))}
+		ioCreator = cio.NewCreator(append([]cio.Opt{cio.WithStreams(stdinC, os.Stdout, os.Stderr)}, ioOpts...)...)
+		
+		i, err := ioCreator(id)
 		opts := runtime.CreateOpts{
 			Spec: specAny,
-			// IO: runtime.IO{
-			// 	Stdin:    r.Stdin,
-			// 	Stdout:   r.Stdout,
-			// 	Stderr:   r.Stderr,
-			// 	Terminal: r.Terminal,
-			// },
+			IO: runtime.IO{
+				Stdin:    i.Stdin,
+				Stdout:   i.Stdout,
+				Stderr:   i.Stderr,
+				Terminal: i.Terminal,
+			},
 			// TaskOptions:    r.Options,
 			// SandboxID:      container.SandboxID,
 		}
