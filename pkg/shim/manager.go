@@ -80,19 +80,20 @@ type ShimManager struct {
 
 // Start launches a new shim instance
 func (m *ShimManager) Start(ctx context.Context, id string, opts runtime.CreateOpts) (_ ShimProcess, retErr error) {
-	_, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	log.G(ctx).Errorf("AAAAA  /run/runs/"+id)
-	log.G(ctx).Errorf(path)
-	bundle := &Bundle{
-		ID:        id,
-		Path:     "/run/runs/"+id,
+	// _, err := os.Getwd()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// log.G(ctx).Errorf("AAAAA  /run/runs/"+id)
+	// log.G(ctx).Errorf(path)
+	// bundle := &Bundle{
+	// 	ID:        id,
+	// 	Path:     "/run/runs/"+id,
 
-	//	Path:      path,
-		Namespace: "default",
-	}
+	// //	Path:      path,
+	// 	Namespace: "default",
+	// }
+	NewBundle(ctx, m.state, id, opts.Spec)
 
 	log.G(ctx).Errorf("AAAAA ShimManager Start bundle %+v", bundle)
 	log.G(ctx).Errorf("AAAAA ShimManager Start opts %+v", opts)
@@ -301,6 +302,7 @@ func NewTaskManager(shims *ShimManager) *TaskManager {
 
 // Create launches new shim instance and creates new task
 func (m *TaskManager) Create(ctx context.Context, taskID string, opts runtime.CreateOpts) (runtime.Task, error) {
+	NewBundle
 	log.G(ctx).Errorf("AAAAA TaskManager Create %+v", opts)
 	process, err := m.manager.Start(ctx, taskID, opts)
 	if err != nil {
