@@ -85,9 +85,12 @@ func (m *ShimManager) Start(ctx context.Context, id string, opts runtime.CreateO
 		return nil, err
 	}
 	log.G(ctx).Errorf("AAAAA  /run/runs/"+id)
+	log.G(ctx).Errorf(path)
 	bundle := &Bundle{
 		ID:        id,
-		Path:      "/run/runs/"+id,
+		Path:     "/run/runs/"+id,
+
+	//	Path:      path,
 		Namespace: "default",
 	}
 
