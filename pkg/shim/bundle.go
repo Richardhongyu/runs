@@ -34,24 +34,24 @@ func NewBundle(ctx context.Context, state, id string, spec typeurl.Any) (b *Bund
 		return nil, fmt.Errorf("invalid task id %s: %w", id, err)
 	}
 
-	// ns, err := namespaces.NamespaceRequired(ctx)
+	ns, err := namespaces.NamespaceRequired(ctx)
 	// if err != nil {
 	// 	return nil, err
 	// }
-	// work := filepath.Join(root, ns, id)
+	work := filepath.Join("/run/runs/", id)
 	b = &Bundle{
 		ID:        id,
 		Path:      "/run/runs/"+id,
 		Namespace: "default",
 	}
-	// var paths []string
-	// defer func() {
-	// 	if err != nil {
-	// 		for _, d := range paths {
-	// 			os.RemoveAll(d)
-	// 		}
-	// 	}
-	// }()
+	var paths []string
+	defer func() {
+		if err != nil {
+			for _, d := range paths {
+				os.RemoveAll(d)
+			}
+		}
+	}()
 	// // create state directory for the bundle
 	// if err := os.MkdirAll(filepath.Dir(b.Path), 0711); err != nil {
 	// 	return nil, err
@@ -64,30 +64,30 @@ func NewBundle(ctx context.Context, state, id string, spec typeurl.Any) (b *Bund
 	// 		return nil, err
 	// 	}
 	// }
-	// paths = append(paths, b.Path)
+	paths = append(paths, b.Path)
 	// // create working directory for the bundle
 	// if err := os.MkdirAll(filepath.Dir(work), 0711); err != nil {
 	// 	return nil, err
 	// }
-	// rootfs := filepath.Join(b.Path, "rootfs")
-	// if err := os.MkdirAll(rootfs, 0711); err != nil {
-	// 	return nil, err
-	// }
-	// paths = append(paths, rootfs)
-	// if err := os.Mkdir(work, 0711); err != nil {
-	// 	if !os.IsExist(err) {
-	// 		return nil, err
-	// 	}
+	rootfs := filepath.Join(b.Path, "rootfs")
+	if err := os.MkdirAll(rootfs, 0711); err != nil {
+		return nil, err
+	}
+	paths = append(paths, rootfs)
+	if err := os.Mkdir(work, 0711); err != nil {
+		if !os.IsExist(err) {
+			return nil, err
+		}
 	// 	os.RemoveAll(work)
 	// 	if err := os.Mkdir(work, 0711); err != nil {
 	// 		return nil, err
 	// 	}
 	// }
-	// paths = append(paths, work)
+	paths = append(paths, work)
 	// // symlink workdir
-	// if err := os.Symlink(work, filepath.Join(b.Path, "work")); err != nil {
-	// 	return nil, err
-	// }
+	if err := os.Symlink(work, filepath.Join(b.Path, "work")); err != nil {
+		return nil, err
+	}
 	if spec := spec.GetValue(); spec != nil {
 		// write the spec to the bundle
 		err = os.WriteFile(filepath.Join(b.Path, configFilename), spec, 0666)

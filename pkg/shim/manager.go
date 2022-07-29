@@ -313,6 +313,9 @@ func (m *TaskManager) Create(ctx context.Context, taskID string, opts runtime.Cr
 	shim := process.(*shimTask)
 	log.G(ctx).Errorf("AAAAA call shim Create start")
 	t, err := shim.Create(ctx, opts)
+	
+	log.G(ctx).WithError(err).Error("log create")
+
 	log.G(ctx).Errorf("AAAAA call shim Create end")
 	if err != nil {
 		// NOTE: ctx contains required namespace information.
