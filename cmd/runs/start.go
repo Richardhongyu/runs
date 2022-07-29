@@ -70,13 +70,15 @@ your host.`,
 	        if err != nil {
         	        return err
 	        }
-
+		
+			fmt.Printf("id: %+v\n", id)
 			bundle := &shim.Bundle{
                 	ID:        id,
 	                Path:      "/run/runs/"+id,
         	        Namespace: "default",
 	        }
 
+			fmt.Printf("id: %+v\n", id)
 	        task, err := shim.LoadShim(ctx, bundle, func() {})
 	        if err != nil {
         	        return err

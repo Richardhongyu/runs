@@ -93,7 +93,7 @@ func (m *ShimManager) Start(ctx context.Context, id string, opts runtime.CreateO
 	// //	Path:      path,
 	// 	Namespace: "default",
 	// }
-	NewBundle(ctx, m.state, id, opts.Spec)
+	bundle, _ := NewBundle(ctx, m.state, id, opts.Spec)
 
 	log.G(ctx).Errorf("AAAAA ShimManager Start bundle %+v", bundle)
 	log.G(ctx).Errorf("AAAAA ShimManager Start opts %+v", opts)
@@ -302,7 +302,6 @@ func NewTaskManager(shims *ShimManager) *TaskManager {
 
 // Create launches new shim instance and creates new task
 func (m *TaskManager) Create(ctx context.Context, taskID string, opts runtime.CreateOpts) (runtime.Task, error) {
-	NewBundle
 	log.G(ctx).Errorf("AAAAA TaskManager Create %+v", opts)
 	process, err := m.manager.Start(ctx, taskID, opts)
 	if err != nil {

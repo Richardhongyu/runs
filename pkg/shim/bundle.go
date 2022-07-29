@@ -16,6 +16,16 @@
 
 package shim
 
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/containerd/containerd/identifiers"
+	"github.com/containerd/typeurl"
+)
+
 const configFilename = "config.json"
 
 // NewBundle returns a new bundle on disk
