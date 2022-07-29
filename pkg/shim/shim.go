@@ -317,6 +317,8 @@ func (s *shimTask) Delete(ctx context.Context, sandboxed bool, removeTask func(c
 }
 
 func (s *shimTask) Create(ctx context.Context, opts runtime.CreateOpts) (runtime.Task, error) {
+	
+	fmt.Printf("ggggggggggggggg %+v", opts.Rootfs)
 	topts := opts.TaskOptions
 	if topts == nil || topts.GetValue() == nil {
 		topts = opts.RuntimeOptions
@@ -331,6 +333,7 @@ func (s *shimTask) Create(ctx context.Context, opts runtime.CreateOpts) (runtime
 		Checkpoint: opts.Checkpoint,
 		Options:    protobuf.FromAny(topts),
 	}
+	fmt.Printf("%+v", opts.Rootfs)
 	for _, m := range opts.Rootfs {
 		request.Rootfs = append(request.Rootfs, &types.Mount{
 			Type:    m.Type,

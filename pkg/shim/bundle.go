@@ -24,6 +24,7 @@ import (
 
 	"github.com/containerd/containerd/identifiers"
 	"github.com/containerd/typeurl"
+//	"github.com/containerd/containerd/namespaces"
 )
 
 const configFilename = "config.json"
@@ -34,7 +35,7 @@ func NewBundle(ctx context.Context, state, id string, spec typeurl.Any) (b *Bund
 		return nil, fmt.Errorf("invalid task id %s: %w", id, err)
 	}
 
-	ns, err := namespaces.NamespaceRequired(ctx)
+//	ns, err := namespaces.NamespaceRequired(ctx)
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -82,7 +83,7 @@ func NewBundle(ctx context.Context, state, id string, spec typeurl.Any) (b *Bund
 	// 	if err := os.Mkdir(work, 0711); err != nil {
 	// 		return nil, err
 	// 	}
-	// }
+	}
 	paths = append(paths, work)
 	// // symlink workdir
 	if err := os.Symlink(work, filepath.Join(b.Path, "work")); err != nil {
