@@ -45,11 +45,11 @@ func NewBundle(ctx context.Context, state, id string, spec typeurl.Any) (b *Bund
 		Path:      "/run/runs/"+id,
 		Namespace: "default",
 	}
-
+/*
 	if err := os.Symlink("/home/vagrant/test/rootfs", filepath.Join(b.Path, "rootfs")); err != nil {
 		return nil, err
 	}
-
+*/
 	var paths []string
 	defer func() {
 		if err != nil {

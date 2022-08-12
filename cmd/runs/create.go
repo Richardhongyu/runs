@@ -168,10 +168,10 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		opts.Runtime = "io.containerd.runc.v2"
 
 		for _, m := range spec.Mounts {
-			cm, err := createLibcontainerMount(cwd, m)
-			if err != nil {
-				return nil, fmt.Errorf("invalid mount %+v: %w", m, err)
-			}
+			//cm, err := createLibcontainerMount(cwd, m)
+			//if err != nil {
+			//	return nil, fmt.Errorf("invalid mount %+v: %w", m, err)
+			//}
 			opts.Rootfs = append(opts.Rootfs, mount.Mount{
 				Type:    m.Type,
 				// Destination:  m.Destination,
