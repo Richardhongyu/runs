@@ -1,4 +1,4 @@
-package main
+.package main
 
 import (
 	"fmt"
@@ -149,6 +149,9 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		
 		i, err := ioCreator(id)
 		cfg := i.Config()
+
+		// container, err := client.LoadContainer(ctx, id)
+
 		opts := runtime.CreateOpts{
 			Spec: specAny,
 			IO: runtime.IO{
@@ -163,13 +166,21 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 
 		opts.Runtime = "io.containerd.runc.v2"
 
-		// for _, m := range r.Rootfs {
-		// 	opts.Rootfs = append(opts.Rootfs, mount.Mount{
-		// 		Type:    m.Type,
-		// 		Source:  m.Source,
-		// 		Options: m.Options,
-		// 	})
-		// }
+		for _, m := range spec.mounts {
+			opts.Rootfs = append(opts.Rootfs, mount.Mount{
+				Type:    m.Type,
+				Destination:  m.Destination,
+				Source:  m.Source,
+				Options: m.Options,
+			})
+		}
+
+
+			// opts.Rootfs = append(opts.Rootfs, mount.Mount{
+			// 	Type:    m.Type,
+			// 	Source:  "./rootfs",
+			// 	Options: [],
+			// })
 
 		taskManager := shim.NewTaskManager(shimManager)
 		taskManager.Create(ctx, id, opts)
