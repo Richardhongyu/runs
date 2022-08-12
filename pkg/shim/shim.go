@@ -62,7 +62,7 @@ func loadAddress(path string) (string, error) {
 }
 
 func LoadShim(ctx context.Context, bundle *Bundle, onClose func()) (_ *shimTask, err error) {
-	
+
 	fmt.Printf("id: \n")
 	address, err := loadAddress(filepath.Join(bundle.Path, "address"))
 	fmt.Printf("load shim", address)
@@ -120,7 +120,7 @@ func LoadShim(ctx context.Context, bundle *Bundle, onClose func()) (_ *shimTask,
 		cancelShimLog()
 		f.Close()
 	}
-	
+
 	fmt.Printf("2id: \n")
 	client := ttrpc.NewClient(conn, ttrpc.WithOnClose(onCloseWithShimLog))
 	defer func() {
@@ -317,7 +317,7 @@ func (s *shimTask) Delete(ctx context.Context, sandboxed bool, removeTask func(c
 }
 
 func (s *shimTask) Create(ctx context.Context, opts runtime.CreateOpts) (runtime.Task, error) {
-	
+
 	fmt.Printf("ggggggggggggggg %+v", opts.Rootfs)
 	topts := opts.TaskOptions
 	if topts == nil || topts.GetValue() == nil {
@@ -342,10 +342,10 @@ func (s *shimTask) Create(ctx context.Context, opts runtime.CreateOpts) (runtime
 		})
 	}
 
-	_, err := s.task.Create(ctx, request)
-	if err != nil {
-		return nil, errdefs.FromGRPC(err)
-	}
+	// _, err := s.task.Create(ctx, request)
+	// if err != nil {
+	// return nil, errdefs.FromGRPC(err)
+	// }
 
 	return s, nil
 }
