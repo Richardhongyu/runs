@@ -1,4 +1,4 @@
-.package main
+package main
 
 import (
 	"fmt"
@@ -20,6 +20,7 @@ import (
 	"github.com/kata-contrib/runs/pkg/cio"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
+		"github.com/containerd/containerd/mount"
 )
 
 const (
@@ -166,10 +167,10 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 
 		opts.Runtime = "io.containerd.runc.v2"
 
-		for _, m := range spec.mounts {
+		for _, m := range spec.Mounts {
 			opts.Rootfs = append(opts.Rootfs, mount.Mount{
 				Type:    m.Type,
-				Destination:  m.Destination,
+				// Destination:  m.Destination,
 				Source:  m.Source,
 				Options: m.Options,
 			})
