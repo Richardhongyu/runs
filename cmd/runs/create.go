@@ -1,30 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"os"
-		"io"
 	sctx "context"
+	"fmt"
+	"io"
+	"os"
 
 	"github.com/urfave/cli"
 
-	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/containerd/log"
+	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/runtime"
-	"github.com/containerd/containerd/log"
 	"github.com/kata-contrib/runs/pkg/shim"
 	"golang.org/x/sys/unix"
 
-//	"cio"
+	//	"cio"
 	"github.com/kata-contrib/runs/pkg/cio"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
-		"github.com/containerd/containerd/mount"
 )
 
 const (
-	stateFilename    = "state.json"
+	stateFilename = "state.json"
 )
 
 type stdinCloser struct {
@@ -89,12 +88,12 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 	},
 	Action: func(context *cli.Context) error {
 		var (
-			id     string
-			ref    string
+			id  string
+			ref string
 		//	config = context.IsSet("config")
 		)
 
-		if 1==1 {
+		if 1 == 1 {
 			id = context.Args().First()
 			if context.NArg() > 1 {
 				return fmt.Errorf("with spec config file, only container id should be provided: %w", errdefs.ErrInvalidArgument)
@@ -137,17 +136,17 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		if err != nil {
 			return err
 		}
-		
+
 		// con = false
 		// nullIO = context.Bool("null-io")
 		// context.String("log-uri")
 		stdinC := &stdinCloser{
 			stdin: os.Stdin,
 		}
-		
+
 		ioOpts := []cio.Opt{cio.WithFIFODir(context.String("fifo-dir"))}
 		ioCreator := cio.NewCreator(append([]cio.Opt{cio.WithStreams(stdinC, os.Stdout, os.Stderr)}, ioOpts...)...)
-		
+
 		i, err := ioCreator(id)
 		cfg := i.Config()
 
@@ -167,25 +166,24 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 
 		opts.Runtime = "io.containerd.runc.v2"
 
-		for _, m := range spec.Mounts {
-			//cm, err := createLibcontainerMount(cwd, m)
-			//if err != nil {
-			//	return nil, fmt.Errorf("invalid mount %+v: %w", m, err)
-			//}
-			opts.Rootfs = append(opts.Rootfs, mount.Mount{
-				Type:    m.Type,
-				// Destination:  m.Destination,
-				Source:  m.Source,
-				Options: m.Options,
-			})
-		}
+		// for _, m := range spec.Mounts {
+		// 	//cm, err := createLibcontainerMount(cwd, m)
+		// 	//if err != nil {
+		// 	//	return nil, fmt.Errorf("invalid mount %+v: %w", m, err)
+		// 	//}
+		// 	opts.Rootfs = append(opts.Rootfs, mount.Mount{
+		// 		Type:    m.Type,
+		// 		// Destination:  m.Destination,
+		// 		Source:  m.Source,
+		// 		Options: m.Options,
+		// 	})
+		// }
 
-
-			// opts.Rootfs = append(opts.Rootfs, mount.Mount{
-			// 	Type:    m.Type,
-			// 	Source:  "./rootfs",
-			// 	Options: [],
-			// })
+		// opts.Rootfs = append(opts.Rootfs, mount.Mount{
+		// 	Type:    m.Type,
+		// 	Source:  "./rootfs",
+		// 	Options: [],
+		// })
 
 		taskManager := shim.NewTaskManager(shimManager)
 		taskManager.Create(ctx, id, opts)
@@ -228,9 +226,8 @@ func saveContainerState(ctx sctx.Context, taskID string, opts runtime.CreateOpts
 		}
 	}()
 
-	WriteJSON(tmpFile, opts);
+	WriteJSON(tmpFile, opts)
 	// stateFilePath := filepath.Join("/run/runs/lhy/", stateFilename)
 	// os.Rename(tmpFile.Name(), stateFilePath)
 	return nil
 }
-
