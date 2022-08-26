@@ -369,7 +369,7 @@ func (m *TaskManager) Create(ctx context.Context, taskID string, opts runtime.Cr
 	log.G(ctx).Errorf("responce is %v", state)
 	// log.G(ctx).Errorf("responce is %v", state.Pid)
 
-	if err := saveContainerState(ctx, taskID, state.Pid, opts); err != nil {
+	if err := saveContainerState(ctx, taskID, state.Status, state.Pid, opts); err != nil {
 		return nil, err
 	}
 
@@ -410,7 +410,7 @@ const (
 	stateFilename = "state.json"
 )
 
-func saveContainerState(ctx sctx.Context, taskID string, pid uint32, opts runtime.CreateOpts) error {
+func saveContainerState(ctx sctx.Context, taskID string, status runtime.Status, pid uint32, opts runtime.CreateOpts) error {
 	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
 	containerRoot, err := securejoin.SecureJoin("/run/runs", taskID)
 	// if err != nil {
@@ -431,16 +431,15 @@ func saveContainerState(ctx sctx.Context, taskID string, pid uint32, opts runtim
 		}
 	}()
 
-	// bundle := &shim.Bundle{
-	// 	ID:        taskID,
-	// 	Path:      "/run/runs/"+taskID,
-	// 	Namespace: "default",
-	// }
+	path, err := os.Getwd()
+	if err != nil {
+		return err
+	}
 
 	state := State{
 		InitProcessPid: int(pid),
-		Status:         runtime.CreatedStatus,
-		Bundle:         "/run/runs/" + taskID,
+		Status:         status,
+		Bundle:         path,
 		Created:        time.Now().UTC(),
 	}
 
