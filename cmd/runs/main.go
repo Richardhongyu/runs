@@ -116,7 +116,7 @@ func main() {
 		// eventsCommand,
 		// execCommand,
 		killCommand,
-		// listCommand,
+		listCommand,
 		// pauseCommand,
 		// psCommand,
 		// restoreCommand,

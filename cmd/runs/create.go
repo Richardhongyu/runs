@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/urfave/cli"
 
@@ -216,6 +217,7 @@ func saveContainerState(ctx sctx.Context, taskID string, opts runtime.CreateOpts
 	// os.MkdirAll(containerRoot, 0711)
 	// os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
 	tmpFile, err := os.CreateTemp(containerRoot, "state.json")
+	fmt.Println("the file name is ", tmpFile.Name())
 	if err != nil {
 		return err
 	}
@@ -227,7 +229,7 @@ func saveContainerState(ctx sctx.Context, taskID string, opts runtime.CreateOpts
 	}()
 
 	WriteJSON(tmpFile, opts)
-	// stateFilePath := filepath.Join("/run/runs/lhy/", stateFilename)
-	// os.Rename(tmpFile.Name(), stateFilePath)
+	stateFilePath := filepath.Join(containerRoot, stateFilename)
+	os.Rename(tmpFile.Name(), stateFilePath)
 	return nil
 }
