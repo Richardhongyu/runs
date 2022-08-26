@@ -151,6 +151,8 @@ func cleanupAfterDeadShim(ctx context.Context, id, ns string, rt *runtime.TaskLi
 	ctx, cancel := timeout.WithContext(ctx, cleanupTimeout)
 	defer cancel()
 
+	log.G(ctx).Errorf("ns is %+v", ns)
+
 	log.G(ctx).WithFields(logrus.Fields{
 		"id":        id,
 		"namespace": ns,
@@ -323,6 +325,7 @@ func (s *shimTask) Create(ctx context.Context, opts runtime.CreateOpts) (runtime
 	if topts == nil || topts.GetValue() == nil {
 		topts = opts.RuntimeOptions
 	}
+	fmt.Printf("ggggggggggggggg %+v", s.ID())
 	request := &task.CreateTaskRequest{
 		ID:         s.ID(),
 		Bundle:     s.bundle.Path,
@@ -342,10 +345,10 @@ func (s *shimTask) Create(ctx context.Context, opts runtime.CreateOpts) (runtime
 		})
 	}
 
-	// _, err := s.task.Create(ctx, request)
-	// if err != nil {
-	// return nil, errdefs.FromGRPC(err)
-	// }
+	_, err := s.task.Create(ctx, request)
+	if err != nil {
+		return nil, errdefs.FromGRPC(err)
+	}
 
 	return s, nil
 }

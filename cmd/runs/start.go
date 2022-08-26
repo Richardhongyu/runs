@@ -2,16 +2,17 @@ package main
 
 import (
 	sctx "context"
-	"os"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/containerd/containerd/namespaces"
 	"github.com/opencontainers/runc/libcontainer"
-//	"github.com/containerd/containerd/runtime"
+
+	//	"github.com/containerd/containerd/runtime"
 	"github.com/containerd/containerd/errdefs"
-	"github.com/urfave/cli"
 	"github.com/kata-contrib/runs/pkg/shim"
+	"github.com/urfave/cli"
 )
 
 var startCommand = cli.Command{
@@ -27,27 +28,27 @@ your host.`,
 		if err := checkArgs(context, 1, exactArgs); err != nil {
 			return err
 		}
-                var (
-                        id     string
-                        ref    string
-                //      config = context.IsSet("config")
-                )
+		var (
+			id  string
+			ref string
+		//      config = context.IsSet("config")
+		)
 
-                if 1==1 {
-                        id = context.Args().First()
-                        if context.NArg() > 1 {
-                                return fmt.Errorf("with spec config file, only container id should be provided: %w", errdefs.ErrInvalidArgument)
-                        }
-                } else {
-                        id = context.Args().Get(1)
-                        ref = context.Args().First()
-                        if ref == "" {
-                                return fmt.Errorf("image ref must be provided: %w", errdefs.ErrInvalidArgument)
-                        }
-                }
-                if id == "" {
-                        return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
-                }
+		if 1 == 1 {
+			id = context.Args().First()
+			if context.NArg() > 1 {
+				return fmt.Errorf("with spec config file, only container id should be provided: %w", errdefs.ErrInvalidArgument)
+			}
+		} else {
+			id = context.Args().Get(1)
+			ref = context.Args().First()
+			if ref == "" {
+				return fmt.Errorf("image ref must be provided: %w", errdefs.ErrInvalidArgument)
+			}
+		}
+		if id == "" {
+			return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
+		}
 		// container, err := getContainer(context)
 		// if err != nil {
 		// 	return err
@@ -59,45 +60,45 @@ your host.`,
 		status := libcontainer.Created
 		switch status {
 		case libcontainer.Created:
-	
+
 			ctx := namespaces.WithNamespace(sctx.Background(), "default")
 
-//			id := context.GlobalString("id")
+			//			id := context.GlobalString("id")
 
 			fmt.Printf("id: %+v\n", id)
 
-	        _, err := os.Getwd()
-	        if err != nil {
-        	        return err
-	        }
-		
+			path, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+
 			fmt.Printf("id: %+v\n", id)
 			bundle := &shim.Bundle{
-                	ID:        id,
-	                Path:      "/run/runs/"+id,
-        	        Namespace: "default",
-	        }
+				ID:        id,
+				Path:      path,
+				Namespace: "default",
+			}
 
 			fmt.Printf("id: %+v\n", id)
-	        task, err := shim.LoadShim(ctx, bundle, func() {})
-	        if err != nil {
-        	        return err
-	        }
-        	state, err := task.State(ctx)
-	        if err != nil {
-        	        // return err
-	        }
+			task, err := shim.LoadShim(ctx, bundle, func() {})
+			if err != nil {
+				return err
+			}
+			state, err := task.State(ctx)
+			if err != nil {
+				// return err
+			}
 
-        	// FIXME check state.
+			// FIXME check state.
 
-	        fmt.Printf("state error: %+v\n", err)
-	        fmt.Printf("state: %+v\n", state)
+			fmt.Printf("state error: %+v\n", err)
+			fmt.Printf("state: %+v\n", state)
 
 			// task, err := findTask(context)
 			if err != nil {
 				return err
 			}
-				
+
 			err = task.Start(ctx)
 			if err != nil {
 				return err
@@ -118,5 +119,3 @@ your host.`,
 		}
 	},
 }
-
-

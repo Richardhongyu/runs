@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 
 	"github.com/urfave/cli"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/log"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/runtime"
@@ -21,10 +19,6 @@ import (
 	"github.com/kata-contrib/runs/pkg/cio"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
-)
-
-const (
-	stateFilename = "state.json"
 )
 
 type stdinCloser struct {
@@ -192,9 +186,9 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 			return err
 		}
 
-		if err := saveContainerState(ctx, id, opts); err != nil {
-			return err
-		}
+		// if err := saveContainerState(ctx, id, opts); err != nil {
+		// return err
+		// }
 
 		// status, err := startContainer(context, CT_ACT_CREATE, nil)
 		// if err == nil {
@@ -205,31 +199,4 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 		// return fmt.Errorf("runc create failed: %w", err)
 		return nil
 	},
-}
-
-func saveContainerState(ctx sctx.Context, taskID string, opts runtime.CreateOpts) error {
-	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
-	containerRoot, err := securejoin.SecureJoin("/run/runs", taskID)
-	// if err != nil {
-	// 	return err
-	// }
-	// os.Stat(containerRoot)
-	// os.MkdirAll(containerRoot, 0711)
-	// os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
-	tmpFile, err := os.CreateTemp(containerRoot, "state.json")
-	fmt.Println("the file name is ", tmpFile.Name())
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err != nil {
-			tmpFile.Close()
-			os.Remove(tmpFile.Name())
-		}
-	}()
-
-	WriteJSON(tmpFile, opts)
-	stateFilePath := filepath.Join(containerRoot, stateFilename)
-	os.Rename(tmpFile.Name(), stateFilePath)
-	return nil
 }

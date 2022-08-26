@@ -18,11 +18,13 @@ package shim
 
 import (
 	"context"
+	sctx "context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/containerd/containerd/api/runtime/task/v2"
 	"github.com/containerd/containerd/errdefs"
@@ -33,6 +35,8 @@ import (
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/runtime"
 	shimbinary "github.com/containerd/containerd/runtime/v2/shim"
+	securejoin "github.com/cyphar/filepath-securejoin"
+	"github.com/kata-contrib/runs/pkg/util"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -40,6 +44,17 @@ type ManagerConfig struct {
 	State        string
 	Address      string
 	TTRPCAddress string
+}
+
+type State struct {
+	// InitProcessPid is the init process id in the parent namespace
+	InitProcessPid int `json:"pid"`
+	// Status is the current status of the container
+	Status runtime.Status
+	// Bundle is the path on the filesystem to the bundle
+	Bundle string `json:"bundle"`
+	// Created is the unix timestamp for the creation time of the container in UTC
+	Created time.Time `json:"created"`
 }
 
 // NewShimManager creates a manager for v2 shims
@@ -146,7 +161,7 @@ func (m *ShimManager) startShim(ctx context.Context, bundle *Bundle, id string, 
 		address:      m.containerdAddress,
 		ttrpcAddress: m.containerdTTRPCAddress,
 	})
-	
+
 	log.G(ctx).Errorf("AAAAA2 ShimManager startShim opts %+v", opts)
 	shim, err := b.Start(ctx, protobuf.FromAny(topts), func() {
 		log.G(ctx).WithField("id", id).Info("shim disconnected")
@@ -337,6 +352,26 @@ func (m *TaskManager) Create(ctx context.Context, taskID string, opts runtime.Cr
 		return nil, fmt.Errorf("failed to create shim task: %w", err)
 	}
 	log.G(ctx).Errorf("AAAAA call shim Create end ok")
+	pid, _ := shim.Pids(ctx)
+	// log.G(ctx).Errorf("id is %v id is  %v", p.id, p.shim.ID())
+	// response, err := shim.task.Delete(ctx, &task.StateRequest{
+	// 	ID:     p.shim.ID(),
+	// 	ExecID: p.id,
+	// })
+	log.G(ctx).Errorf("responce is %v", pid)
+
+	state, _ := shim.State(ctx)
+	// log.G(ctx).Errorf("id is %v id is  %v", p.id, p.shim.ID())
+	// response, err := shim.task.Delete(ctx, &task.StateRequest{
+	// 	ID:     p.shim.ID(),
+	// 	ExecID: p.id,
+	// })
+	log.G(ctx).Errorf("responce is %v", state)
+	// log.G(ctx).Errorf("responce is %v", state.Pid)
+
+	if err := saveContainerState(ctx, taskID, state.Pid, opts); err != nil {
+		return nil, err
+	}
 
 	return t, nil
 }
@@ -369,4 +404,48 @@ func (m *TaskManager) Delete(ctx context.Context, taskID string) (*runtime.Exit,
 	}
 
 	return exit, nil
+}
+
+const (
+	stateFilename = "state.json"
+)
+
+func saveContainerState(ctx sctx.Context, taskID string, pid uint32, opts runtime.CreateOpts) error {
+	log.G(ctx).Errorf("AAAAA TaskManager save %+v", opts)
+	containerRoot, err := securejoin.SecureJoin("/run/runs", taskID)
+	// if err != nil {
+	// 	return err
+	// }
+	// os.Stat(containerRoot)
+	// os.MkdirAll(containerRoot, 0711)
+	// os.Chown(containerRoot, unix.Geteuid(), unix.Getegid())
+	tmpFile, err := os.CreateTemp(containerRoot, "state.json")
+	fmt.Println("the file name is ", tmpFile.Name())
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tmpFile.Close()
+			os.Remove(tmpFile.Name())
+		}
+	}()
+
+	// bundle := &shim.Bundle{
+	// 	ID:        taskID,
+	// 	Path:      "/run/runs/"+taskID,
+	// 	Namespace: "default",
+	// }
+
+	state := State{
+		InitProcessPid: int(pid),
+		Status:         runtime.CreatedStatus,
+		Bundle:         "/run/runs/" + taskID,
+		Created:        time.Now().UTC(),
+	}
+
+	util.WriteJSON(tmpFile, state)
+	stateFilePath := filepath.Join(containerRoot, stateFilename)
+	os.Rename(tmpFile.Name(), stateFilePath)
+	return nil
 }

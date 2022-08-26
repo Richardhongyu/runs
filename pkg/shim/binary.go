@@ -80,9 +80,9 @@ func (b *binary) Start(ctx context.Context, opts *types.Any, onClose func()) (_ 
 			Opts:         opts,
 			Args:         args,
 		})
-//	out, err := cmd.CombinedOutput()
-//	log.G(ctx).WithError(err).Error("log 000000000000 %s", string(out))
-//	log.G(ctx).WithError(err).Error("log 000000000000")
+	//	out, err := cmd.CombinedOutput()
+	//	log.G(ctx).WithError(err).Error("log 000000000000 %s", string(out))
+	//	log.G(ctx).WithError(err).Error("log 000000000000")
 
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (b *binary) Start(ctx context.Context, opts *types.Any, onClose func()) (_ 
 	// this helps with synchronization of the shim
 	// copy the shim's logs to containerd's output
 
-			log.G(ctx).WithError(err).Error("log cccccccccccccccc")
+	log.G(ctx).WithError(err).Error("log cccccccccccccccc")
 	go func() {
 		defer f.Close()
 		_, err := io.Copy(os.Stderr, f)
@@ -119,17 +119,17 @@ func (b *binary) Start(ctx context.Context, opts *types.Any, onClose func()) (_ 
 		// depends on platform.
 		err = checkCopyShimLogError(ctx, err)
 
-			log.G(ctx).WithError(err).Error("log bbbbbbbbbbbbbbbbbbbb")
+		log.G(ctx).WithError(err).Error("log bbbbbbbbbbbbbbbbbbbb")
 		if err != nil {
 			log.G(ctx).WithError(err).Error("copy shim log")
 		}
 	}()
 	out, err := cmd.CombinedOutput()
 
-			log.G(ctx).WithError(err).Error("log 000000000000 %s", string(out))
-			log.G(ctx).WithError(err).Error("log 000000000000")
+	log.G(ctx).WithError(err).Error("log 000000000000 %s", string(out))
+	log.G(ctx).WithError(err).Error("log 000000000000")
 	if err != nil {
-			log.G(ctx).WithError(err).Error("log aaaaaaaaaaaaaaa")
+		log.G(ctx).WithError(err).Error("log aaaaaaaaaaaaaaa")
 		return nil, fmt.Errorf("%s: %w", out, err)
 	}
 	address := strings.TrimSpace(string(out))
