@@ -65,14 +65,14 @@ func LoadShim(ctx context.Context, bundle *Bundle, onClose func()) (_ *shimTask,
 
 	fmt.Printf("id: \n")
 	address, err := loadAddress(filepath.Join(bundle.Path, "address"))
-	fmt.Printf("load shim", address)
+	fmt.Printf("load shim %s\n", address)
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Printf("id: \n")
 	conn, err := client.Connect(address, client.AnonReconnectDialer)
-	fmt.Printf("invalid task  %w", err)
+	fmt.Printf("invalid task  %w\n", err)
 	fmt.Printf("5id: \n")
 	if err != nil {
 		return nil, err

@@ -25,14 +25,16 @@ are starting. The name you provide for the container instance must be unique on
 your host.`,
 	Description: `The start command executes the user defined process in a created container.`,
 	Action: func(context *cli.Context) error {
-		if err := checkArgs(context, 1, exactArgs); err != nil {
-			return err
-		}
+		// if err := checkArgs(context, 1, exactArgs); err != nil {
+		// 	return err
+		// }
 		var (
 			id  string
 			ref string
 		//      config = context.IsSet("config")
 		)
+
+		fmt.Println("number: %w\n", context.NArg())
 
 		if 1 == 1 {
 			id = context.Args().First()
@@ -47,7 +49,9 @@ your host.`,
 			}
 		}
 		if id == "" {
-			return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
+			id = context.GlobalString("id")
+			fmt.Println("number: %w\n", id)
+			// return fmt.Errorf("container id must be provided: %w", errdefs.ErrInvalidArgument)
 		}
 		// container, err := getContainer(context)
 		// if err != nil {

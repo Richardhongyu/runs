@@ -12,11 +12,9 @@ import (
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/protobuf"
 	"github.com/containerd/containerd/runtime"
+	"github.com/kata-contrib/runs/pkg/cio"
 	"github.com/kata-contrib/runs/pkg/shim"
 	"golang.org/x/sys/unix"
-
-	//	"cio"
-	"github.com/kata-contrib/runs/pkg/cio"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
 )
@@ -159,7 +157,7 @@ command(s) that get executed on start, edit the args parameter of the spec. See
 			// SandboxID:      container.SandboxID,
 		}
 
-		opts.Runtime = "io.containerd.runc.v2"
+		opts.Runtime = "io.containerd.kata.v2"
 
 		// for _, m := range spec.Mounts {
 		// 	//cm, err := createLibcontainerMount(cwd, m)
